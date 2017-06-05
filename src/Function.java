@@ -32,7 +32,7 @@ public class Function {
 
     // Set Function to f(x)=c
     public Function(double c) {
-        Term powZero = new Term(1,"exp",0);
+        Term powZero = new Term(c,"exp",0);
         contents[0] = powZero;
         nextIndex = 1;
     }
@@ -113,41 +113,101 @@ public class Function {
 
     // return the Function value at x
     public double evaluate(double x) {
-        // if the nextIndex is zero
-            // return zero
-        // for each term in contents
-            // if the flag is an exponent
-                // raise x to power of numberTwo
-                // multiply x by numberOne
-            // else
-                // x equals x times numberTwo
-                // if the flag is cos
-                    // x is cosine x
-                // if the flag is sin
-                    // x is sin x
-                // if the flag is tan
-                    // x is tan x
-                // multiply x by numberOne
+        // no terms, no result
+        if (nextIndex == 0)  {
+            return 0.0;
+        }
+        double t = 0;
+        // loop through each value
+        for (int i = 0; i < nextIndex; i++) {
+            if (i == 0)  {
+                t = evaluateTerm(contents[i],x);
+            }   else    {
+                t = t + evaluateTerm(contents[i],x);
+            }
+        }   // end for loop
+        // set x back to the value being returned
+        x = t;
+        //System.out.println(contents.toString());
         return x;
     }
 
+    public double evaluateTerm(Term termIn, double x)   {
+        double temp;
+        if (termIn.flag.equals("exp"))   {
+            // raise x to exponent
+            temp = Math.pow(x,termIn.numberTwo);
+            // multiply by coefficient
+            temp = temp * termIn.numberOne;
+        }   else    {
+            // multiply by coefficient of x
+            temp = x * termIn.numberTwo;
+            // take trigonometric value of x
+            if (termIn.flag.equals("sin")) {
+                temp = Math.sin(temp);
+            }   else if (termIn.flag.equals("cos"))  {
+                temp = Math.cos(temp);
+            }   else if (termIn.flag.equals("tan"))   {
+                temp = Math.tan(temp);
+            }
+            // multiply by coefficient of trig function
+            temp = temp * termIn.numberOne;
+        }
+        // termReport
+        System.out.printf("\tx=" + x + " numOne=" + termIn.numberOne + " flag=" + termIn.flag
+        + " numTwo=" + termIn.numberTwo + " temp=" + temp + "\n");
+        return temp;
+    }
+
+    boolean isEqual(double a, double b) {
+        return Math.abs(a - b) < 0.0001;
+    }
 
     // returns a Function that is the addition of this Function with f
     // (combine similar terms when possible)
     public Function add(Function f) {
-        // for each item in contents of f
-            // look for like terms
-            // or just add to contents and increase next index
-        // if next index equals max_final
-            // reject the other terms and toString the remaining terms
+        // the final index of f as "add" starts moving
+        int FINAL_INDEX = f.nextIndex;
+        boolean placed;
+        // for every term in THIS contents
+        for (int i = 0; i < nextIndex; i++)   {
+            placed = false;
+            // check against every term in function f's contents
+            for (int j = 0; j < FINAL_INDEX; j++) {
+                // if they have the same base and flag ...
+                System.out.println("Comparison ...");
+                System.out.println(contents[i].numberTwo);
+                System.out.println(f.contents[j].numberTwo);
+                System.out.println(contents[i].flag);
+                System.out.println(f.contents[j].flag);
+                System.out.println(isEqual(contents[i].numberTwo, f.contents[j].numberTwo));
 
+                if (isEqual(contents[i].numberTwo, f.contents[j].numberTwo) && (contents[i].flag.equals(f.contents[j].flag))) {
+                    System.out.println("Boom, inside the combination machine");
+                    // add the numberOnes
+                    f.contents[j].numberOne = f.contents[j].numberOne + contents[i].numberOne;
+                    placed = true;
+                }
+            }
+            // if there were no like bases and there IS room for a new term ...
+            if ((placed == false) && (f.nextIndex < MAX_TERM_CAPACITY))  {
+                f.contents[f.nextIndex] = contents[i];
+                f.nextIndex = f.nextIndex + 1;
+            }   else if (placed == false)    {
+                // else there is no room and the term must be rejected
+                System.out.println("Unable to complete process for term: " + f.contents[i].toString());
+            }
+        }
+        System.out.println("f");
+        System.out.println(f.toString());
         return f;
     }
-
 
     // returns a Function that is the subtraction of this Function with f
     // (combine similar terms when possible)
     public Function subtract(Function f) {
+        // flip the positive/negative of every numberOne in every term
+        // add
         return f;
     }
 
@@ -166,31 +226,30 @@ public class Function {
     //     7.00x^4.00-x^4.00
     // // NOTE: String.format method will be useful/similar to System.out.printf method.
     public String toString() {
-    //     4.00cos(x)-tan(3.00x)+7.00x^8.00-x^2.00+6.00+9.00x^(-1.00)
-    //     -4.50sin(x)+sin(2.5x)+3.25sin(2.0x)
         if (nextIndex == 0) {
-            return "This Function contains no terms and will return zero\n";
+            return "Function contains no terms and will return zero";
         }
         String stuff = "";
-        // optional nextIndex printing
-        // stuff = stuff + "nextIndex is " + nextIndex + "\n";
         for (int i = 0; i < nextIndex; i++) {
             // add plus sign between terms for positive terms to show addition
-            if (contents[i].numberOne > 0 && i > 0) {
-                stuff = stuff + "+";
+            if ((contents[i].numberOne > 0) && (i > 0)) {
+                stuff = stuff + " + ";
             }
             // print actual term
-            stuff = stuff + toString(contents[i]);
+            stuff = stuff + termToString(contents[i]);
         }
-        stuff = stuff + "\n";
+        // stuff = stuff;
         return stuff;
     }
-    public String toString(Term termIn)    {
+    public String termToString(Term termIn)    {
         String termString = "";
+        // add first number, either coefficient of trig or coefficient of x
         termString = termString + Double.toString(termIn.numberOne);
         if (termIn.flag.equals("exp")) {
+            // add x and exponent
             termString = termString + "x^" + Double.toString(termIn.numberTwo);
         }   else    {
+            // add trigFunction, and quantity coefficient and x
             termString = termString + termIn.flag + "(" + Double.toString(termIn.numberTwo) + "x)";
         }
         return termString;
