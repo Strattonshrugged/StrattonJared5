@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="34c90acf-f521-4a60-ae18-56ef4c5a5cfe" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/Function/Function.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/Function/FunctionTown.class" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Function.java" afterPath="$PROJECT_DIR$/src/Function.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/FunctionTown.java" afterPath="$PROJECT_DIR$/src/FunctionTown.java" />
-    </list>
+    <list default="true" id="34c90acf-f521-4a60-ae18-56ef4c5a5cfe" name="Default" comment="" />
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
