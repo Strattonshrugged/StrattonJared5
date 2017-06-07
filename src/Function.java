@@ -2,12 +2,20 @@
  * Created by jared stratton on 5/31/17.
  */
 
+import java.text.DecimalFormat;
+
 // PLEASE leave your class name as Function
 public class Function {
     // CLASS VARIABLES
     public static final int MAX_TERM_CAPACITY = 10;
     Term[] contents = new Term[MAX_TERM_CAPACITY];
     int nextIndex = 0;
+
+
+    boolean isEqual(double a, double b) {
+        return Math.abs(a - b) < 0.0001;
+    }
+
 
     public class Term   {
         Double numberOne;
@@ -62,15 +70,16 @@ public class Function {
 
     // Set Function to f(x)=coeff*trigFunction(px)
     public Function(double coeff, String trigFunction, double p) {
-        if (trigFunction.equals("sin")) {
+        String flag = trigFunction.toLowerCase();
+        if (flag.equals("sin")) {
             Term temp = new Term(coeff,"sin",p);
             contents[0] = temp;
             nextIndex = 1;
-        }   else if (trigFunction.equals("cos"))    {
+        }   else if (flag.equals("cos"))    {
             Term temp = new Term(coeff,"cos",p);
             contents[0] = temp;
             nextIndex = 1;
-        }   else if (trigFunction.equals("tan"))    {
+        }   else if (flag.equals("tan"))    {
             Term temp = new Term(coeff,"tan",p);
             contents[0] = temp;
             nextIndex = 1;
@@ -90,7 +99,11 @@ public class Function {
 
     // Add a trigonometric term of the form c*trigFunction(px)
     public boolean addTerm(double c, String trigFunction, double p) {
-        if (trigFunction.equals("sin") || trigFunction.equals("cos") || trigFunction.equals("tan")) {
+        String flag = trigFunction.toLowerCase();
+        if (flag.equals("exp")) {
+            addTerm(c,p);
+            return true;
+        }   else if (flag.equals("sin") || flag.equals("cos") || flag.equals("tan")) {
             Term spawn = new Term(c,trigFunction,p);
             contents[nextIndex] = spawn;
             nextIndex = nextIndex + 1;
@@ -99,6 +112,20 @@ public class Function {
             System.out.println("Invalid Function input, please check Trig Function desired");
             return false;
         }
+    }
+
+
+
+    // Create identical clone of a Function
+    // usage: "Function blah = Bee.doppel()" ... would create a clone of Function Bee
+    public Function doppel()  {
+        Function spawn = new Function();
+        for (int i = 0; i < this.nextIndex; i++)    {
+            Term eggplant = new Term(this.contents[i].numberOne,this.contents[i].flag,this.contents[i].numberTwo);
+            spawn.contents[i] = eggplant;
+        }
+        spawn.nextIndex = this.nextIndex;
+        return spawn;
     }
 
 
@@ -159,72 +186,51 @@ public class Function {
         return temp;
     }
 
-    boolean isEqual(double a, double b) {
-        return Math.abs(a - b) < 0.0001;
-    }
 
     // returns a Function that is the addition of this Function with f
     // (combine similar terms when possible)
     public Function add(Function f) {
-        // the final index of f as "add" starts moving
-        int FINAL_INDEX = f.nextIndex;
-        boolean placed;
-        // for every term in THIS contents
-        for (int i = 0; i < nextIndex; i++)   {
+        Boolean placed;
+        Function m = this.doppel();
+        f = f.doppel();
+        // check every term in f
+        for (int i = 0; i < f.nextIndex; i++) {
             placed = false;
-            // check against every term in function f's contents
-            for (int j = 0; j < FINAL_INDEX; j++) {
-                // if they have the same base and flag ...
-                System.out.println("Comparison ...");
-                System.out.println(contents[i].numberTwo);
-                System.out.println(f.contents[j].numberTwo);
-                System.out.println(contents[i].flag);
-                System.out.println(f.contents[j].flag);
-                System.out.println(isEqual(contents[i].numberTwo, f.contents[j].numberTwo));
-
-                if (isEqual(contents[i].numberTwo, f.contents[j].numberTwo) && (contents[i].flag.equals(f.contents[j].flag))) {
-                    System.out.println("Boom, inside the combination machine");
-                    // add the numberOnes
-                    f.contents[j].numberOne = f.contents[j].numberOne + contents[i].numberOne;
+            // check against every term in m for identical base
+            for (int j = 0; j < m.nextIndex; j++) {
+                // if they have the same flag and numberTwo, combine numberOne
+                if (isEqual(f.contents[i].numberTwo, m.contents[j].numberTwo)
+                        && (f.contents[i].flag.equals(m.contents[j].flag))) {
+                    m.contents[i].numberOne = m.contents[i].numberOne + f.contents[j].numberOne;
                     placed = true;
                 }
             }
-            // if there were no like bases and there IS room for a new term ...
-            if ((placed == false) && (f.nextIndex < MAX_TERM_CAPACITY))  {
-                f.contents[f.nextIndex] = contents[i];
-                f.nextIndex = f.nextIndex + 1;
-            }   else if (placed == false)    {
-                // else there is no room and the term must be rejected
+            // if there are no identical bases and there is room, toss it in
+            if (!placed && m.nextIndex < MAX_TERM_CAPACITY) {
+                Term temp = new Term(f.contents[i].numberOne, f.contents[i].flag,f.contents[i].numberTwo);
+                m.contents[nextIndex] = temp;
+                m.nextIndex = nextIndex + 1;
+            } else if (!placed) {
                 System.out.println("Unable to complete process for term: " + f.contents[i].toString());
             }
-        }
-        System.out.println("f");
-        System.out.println(f.toString());
-        return f;
-    }
+        }   // end of for loop
+         return m;
+    }   // end of add Function
+
 
     // returns a Function that is the subtraction of this Function with f
     // (combine similar terms when possible)
     public Function subtract(Function f) {
-        // flip the positive/negative of every numberOne in every term
-        // add
-        return f;
+        f = f.doppel();
+        Function m = this.doppel();
+        for (int i = 0; i < f.nextIndex; i++)   {
+            f.contents[i].numberOne = -f.contents[i].numberOne;
+        }
+        Function p = m.add(f);
+        return p;
     }
 
 
-    // returns a String to represent the function
-    // - combine similar terms
-    // - show all coefficients to two places after decimal
-    // - omit coefficients of 1.0000 except for negative exponents.
-    // [There are NO specifications as to the order terms are displayed].
-    // // Good Examples:
-    //     4.00cos(x)-tan(3.00x)+7.00x^8.00-x^2.00+6.00+9.00x^(-1.00)
-    //     -4.50sin(x)+sin(2.5x)+3.25sin(2.0x)
-    // // Bad Examples:
-    //     7.00x^8.00-1.00x^2.00+6.00+9.00x^-1.00
-    //     -4.50sin(x)+sin(x)+3.25sin(x)
-    //     7.00x^4.00-x^4.00
-    // // NOTE: String.format method will be useful/similar to System.out.printf method.
     public String toString() {
         if (nextIndex == 0) {
             return "Function contains no terms and will return zero";
@@ -233,34 +239,88 @@ public class Function {
         for (int i = 0; i < nextIndex; i++) {
             // add plus sign between terms for positive terms to show addition
             if ((contents[i].numberOne > 0) && (i > 0)) {
-                stuff = stuff + " + ";
+                stuff = stuff + "+";
+            }   else    {
+                stuff = stuff + "";
             }
             // print actual term
             stuff = stuff + termToString(contents[i]);
         }
-        // stuff = stuff;
+
         return stuff;
     }
     public String termToString(Term termIn)    {
+        DecimalFormat tw0 = new DecimalFormat("#0.00");
         String termString = "";
         // add first number, either coefficient of trig or coefficient of x
-        termString = termString + Double.toString(termIn.numberOne);
-        if (termIn.flag.equals("exp")) {
-            // add x and exponent
-            termString = termString + "x^" + Double.toString(termIn.numberTwo);
+        if (isEqual(termIn.numberOne,1))    {
+        }   else if (isEqual(termIn.numberOne,-1))  {
+            termString = termString + "-";
         }   else    {
-            // add trigFunction, and quantity coefficient and x
-            termString = termString + termIn.flag + "(" + Double.toString(termIn.numberTwo) + "x)";
+            //termString = termString + Double.toString(termIn.numberOne);
+            termString = termString + tw0.format(termIn.numberOne);
+        }
+        if (termIn.flag.equals("exp")) {
+            // add x unless it's to the power of zero
+            if (isEqual(termIn.numberTwo,0))    {
+            }   else {
+                termString = termString + "x";
+            }
+            // add power, wrap in parenthesis
+            if (isEqual(termIn.numberTwo,1) || isEqual(termIn.numberTwo,0)) {
+            }   else if(termIn.numberTwo < 0 && !isEqual(termIn.numberTwo,0))   {
+                termString = termString + "^(" + tw0.format(termIn.numberTwo) + ")";
+            }   else    {
+                termString = termString + "^" + tw0.format(termIn.numberTwo);
+            }
+        }   else    {
+            // add trigFunction, and x coefficient and x-character
+            termString = termString + termIn.flag + "(";
+            if (isEqual(termIn.numberTwo,1)) {
+            }   else    {
+                termString = termString + tw0.format(termIn.numberTwo);
+            }
+            termString = termString + "x)";
         }
         return termString;
     }
 
 
+    public double slope(double X) {
+        double left = evaluate(X-0.00000000005);
+        double right = evaluate(X+0.00000000005);
+        double rise = Math.abs(evaluate(left) - evaluate(right));
+        double run = Math.abs(left - right);
+        if (evaluate(left) > evaluate(right))   {
+            return -(Math.abs(rise/run));
+        }   else    {
+            return Math.abs(rise/run);
+        }
+    }
+
+    public double integral(double start, double end) {
+        // take start and end, divide difference by one million, that's a "step"
+        double stepsDesired = 10000000;
+        double stepSize = (end - start)/stepsDesired;
+        double A,B,Area;
+        double tally = 0.0;
+
+        for (double cursor = start; cursor+stepSize < end; cursor += stepSize)  {
+            A = evaluate(cursor);
+            B = evaluate(cursor + stepSize);
+            Area = ((A + B) / 2) * stepSize;
+
+            tally = tally + Area;
+        }
+
+        return tally;
+    }   // end of integral
 
 
     /* UNDER DEVELOPMENT
 // return function slope=rise/run using a deltaX of 0.0000000001
         symmetrically about X
+
 // (i.e. let run be defined by: X-0.00000000005 to X+0.00000000005) public double slope(double X) {
 
         } // return the integral value of the function between x value interval,
@@ -269,6 +329,7 @@ public class Function {
         value.
 // If start is greater than end, return the negative value of the
         integration end to start.
+
 public double integral(double start, double end) {
 
         } // Use any additional methods as you see fit.

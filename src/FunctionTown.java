@@ -9,7 +9,30 @@ public class FunctionTown extends Function{
 
 
     public static void main(String args[]) {
+        Function A = new Function(3);
+        Function B = new Function(3,6);
+        Function C = new Function(6,9,12);
+        Function D = new Function(-4,-1);
+        D.addTerm(4,-4);
+        D.addTerm(2,"cos",12);
+        Function E = new Function(-1,"sin",2);
+        Function F = new Function(3,"cos",4);
+        Function G = new Function(5,"tan",6);
+        Function Z = A.add(B);
+        Z = Z.add(C);
+        Z = Z.add(D);
+        Z = Z.add(E);
+        Z = Z.add(F);
+        Z = Z.add(G);
+        System.out.println(Z.toString());
+        //System.out.println(Z.slope(0.0000000001));
+        //System.out.println(Z.integral(-0.00000000005,0.00000000005));
+
+        Function R = new Function(2,1);
+        System.out.println(R.toString());
+        //R.slope(2);
         /*
+
         System.out.println("Function nada");
         Function nada = new Function();
         double evaluateNada = nada.evaluate(4);
@@ -37,21 +60,13 @@ public class FunctionTown extends Function{
         System.out.println(evaluateTres);
         System.out.println(tres.toString());
         System.out.println();
-        */
-
-        System.out.println("Function combo");
-        Function partA = new Function(2.0,2.0,2.0);
-        double evaluatePartA = partA.evaluate(2);
-        System.out.println(evaluatePartA);
-
-        Function partB = new Function (2.0,2.0,2.0);
-        double evaluatePartB = partB.evaluate(2);
-        System.out.println(evaluatePartB);
-
-        System.out.println("partAtoString: " + partA.toString());
-        System.out.println("partBtoString: " + partB.toString());
-        partA.add(partB);
+*/
+        //System.out.println(A.slope(1));
 
 
     }   // end of main
+
+
+
 }   // end of Sandbox class
+
