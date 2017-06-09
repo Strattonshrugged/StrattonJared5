@@ -13,11 +13,12 @@ public class Function {
     private int nextIndex = 0;
 
 
+    // for comparing two floats, to see if they're "equal enough" to call the same
     private boolean isEqual(double a, double b) {
         return Math.abs(a - b) < 0.0001;
     }
 
-
+    // helper class!
     private class Term   {
         Double numberOne;
         String flag;
@@ -34,7 +35,7 @@ public class Function {
 
     // CONSTRUCTORS
     // Initialize Function to f(x)=0
-    // this is already done by virtue of having no terms in it
+    // this is already done by virtue of having no terms in it, evaluation will return 0
     public Function() {
     }
 
@@ -148,6 +149,7 @@ public class Function {
 
 
     // return the Function value at x
+    // didn't format this number in case it needed to be passed to other function
     public double evaluate(double x) {
         // no terms, no result
         if (nextIndex == 0)  {
@@ -168,6 +170,7 @@ public class Function {
         return x;
     }
 
+    // just for evaluating terms and passing back to evaluate
     private double evaluateTerm(Term termIn, double x)   {
         double temp;
         if (termIn.flag.equals("exp"))   {
@@ -238,7 +241,7 @@ public class Function {
         return p;
     }
 
-
+    // Prints contents of function into legible format with help of termToString
     public String toString() {
         if (nextIndex == 0) {
             return "Function contains no terms and will return zero";
@@ -257,7 +260,7 @@ public class Function {
         return stuff;
     }
 
-
+    // called by toString, just for printing out individual terms
     private String termToString(Term termIn)    {
         String termString = "";
         // add first number, either coefficient of trig or coefficient of x
@@ -293,7 +296,7 @@ public class Function {
         return termString;
     }
 
-
+    // calculates slope
     public double slope(double X) {
         // slope = y1 - y2 / x1 - x2
         // x1 and y1 are left of X, x2 and y2 are right of x
@@ -305,8 +308,11 @@ public class Function {
     }
 
 
+    // calculates integral using an excessive number of samples
+    // Jumpstart aids reapproach to problem: do not remove
+    // function calculates evaluation once per iteration instead of twice
+
     public double integral(double start, double end) {
-        // take start and end, divide difference by one million, that's a "step"
         double stepsDesired = 10000000;
         double stepSize = (end - start)/stepsDesired;
         double A = 0.0;
@@ -314,7 +320,6 @@ public class Function {
         double tally = 0.0;
         boolean jumpstart = true;
 
-        // Rather than evaluate twice iteration--passes right step to left, calculates right
         for (double cursor = start; cursor+stepSize < end; cursor += stepSize)  {
             if (jumpstart == true)  {
                 A = evaluate(cursor);
@@ -327,4 +332,5 @@ public class Function {
         }
         return Math.round(tally*100.0)/100.0;
     }   // end of integral
+
 }   // End of Function Class
