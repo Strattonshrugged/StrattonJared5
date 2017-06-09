@@ -7,17 +7,18 @@ import java.text.DecimalFormat;
 // PLEASE leave your class name as Function
 public class Function {
     // CLASS VARIABLES
-    public static final int MAX_TERM_CAPACITY = 10;
-    Term[] contents = new Term[MAX_TERM_CAPACITY];
-    int nextIndex = 0;
+    private static final int MAX_TERM_CAPACITY = 10;
+    private DecimalFormat tw0 = new DecimalFormat("#0.00");
+    private Term[] contents = new Term[MAX_TERM_CAPACITY];
+    private int nextIndex = 0;
 
 
-    boolean isEqual(double a, double b) {
+    private boolean isEqual(double a, double b) {
         return Math.abs(a - b) < 0.0001;
     }
 
 
-    public class Term   {
+    private class Term   {
         Double numberOne;
         String flag;
         Double numberTwo;
@@ -105,6 +106,14 @@ public class Function {
             return true;
         }   else if (flag.equals("sin") || flag.equals("cos") || flag.equals("tan")) {
             Term spawn = new Term(c,trigFunction,p);
+            // find like bases
+            for (int i = 0; i < nextIndex; i++) {
+                if (isEqual(contents[i].numberTwo, spawn.numberTwo)
+                        && (contents[i].flag.equals(spawn.flag)))   {
+                    contents[i].numberOne = contents[i].numberOne + spawn.numberOne;
+                    return true;
+                }
+            }
             contents[nextIndex] = spawn;
             nextIndex = nextIndex + 1;
             return true;
@@ -159,7 +168,7 @@ public class Function {
         return x;
     }
 
-    public double evaluateTerm(Term termIn, double x)   {
+    private double evaluateTerm(Term termIn, double x)   {
         double temp;
         if (termIn.flag.equals("exp"))   {
             // raise x to exponent
@@ -199,9 +208,8 @@ public class Function {
             // check against every term in m for identical base
             for (int j = 0; j < m.nextIndex; j++) {
                 // if they have the same flag and numberTwo, combine numberOne
-                if (isEqual(f.contents[i].numberTwo, m.contents[j].numberTwo)
-                        && (f.contents[i].flag.equals(m.contents[j].flag))) {
-                    m.contents[i].numberOne = m.contents[i].numberOne + f.contents[j].numberOne;
+                if (isEqual(f.contents[i].numberTwo, m.contents[j].numberTwo) && (f.contents[i].flag.equals(m.contents[j].flag))) {
+                    m.contents[i].numberOne = m.contents[i].numberOne + f.contents[i].numberOne;
                     placed = true;
                 }
             }
@@ -246,18 +254,17 @@ public class Function {
             // print actual term
             stuff = stuff + termToString(contents[i]);
         }
-
         return stuff;
     }
-    public String termToString(Term termIn)    {
-        DecimalFormat tw0 = new DecimalFormat("#0.00");
+
+
+    private String termToString(Term termIn)    {
         String termString = "";
         // add first number, either coefficient of trig or coefficient of x
         if (isEqual(termIn.numberOne,1))    {
         }   else if (isEqual(termIn.numberOne,-1))  {
             termString = termString + "-";
         }   else    {
-            //termString = termString + Double.toString(termIn.numberOne);
             termString = termString + tw0.format(termIn.numberOne);
         }
         if (termIn.flag.equals("exp")) {
@@ -266,6 +273,7 @@ public class Function {
             }   else {
                 termString = termString + "x";
             }
+
             // add power, wrap in parenthesis
             if (isEqual(termIn.numberTwo,1) || isEqual(termIn.numberTwo,0)) {
             }   else if(termIn.numberTwo < 0 && !isEqual(termIn.numberTwo,0))   {
@@ -287,52 +295,36 @@ public class Function {
 
 
     public double slope(double X) {
-        double left = evaluate(X-0.00000000005);
-        double right = evaluate(X+0.00000000005);
-        double rise = Math.abs(evaluate(left) - evaluate(right));
-        double run = Math.abs(left - right);
-        if (evaluate(left) > evaluate(right))   {
-            return -(Math.abs(rise/run));
-        }   else    {
-            return Math.abs(rise/run);
-        }
+        // slope = y1 - y2 / x1 - x2
+        // x1 and y1 are left of X, x2 and y2 are right of x
+        double x1 = (X - 0.00000000005);
+        double y1 = evaluate(x1);
+        double x2 = (X + 0.00000000005);
+        double y2 = evaluate(x2);
+        return Math.round(((y1 - y2) / (x1 - x2))*100.0)/100.0;
     }
+
 
     public double integral(double start, double end) {
         // take start and end, divide difference by one million, that's a "step"
         double stepsDesired = 10000000;
         double stepSize = (end - start)/stepsDesired;
-        double A,B,Area;
+        double A = 0.0;
+        double B,Area;
         double tally = 0.0;
+        boolean jumpstart = true;
 
+        // Rather than evaluate twice iteration--passes right step to left, calculates right
         for (double cursor = start; cursor+stepSize < end; cursor += stepSize)  {
-            A = evaluate(cursor);
+            if (jumpstart == true)  {
+                A = evaluate(cursor);
+                jumpstart = false;
+            }
             B = evaluate(cursor + stepSize);
             Area = ((A + B) / 2) * stepSize;
-
             tally = tally + Area;
+            A = B;
         }
-
-        return tally;
+        return Math.round(tally*100.0)/100.0;
     }   // end of integral
-
-
-    /* UNDER DEVELOPMENT
-// return function slope=rise/run using a deltaX of 0.0000000001
-        symmetrically about X
-
-// (i.e. let run be defined by: X-0.00000000005 to X+0.00000000005) public double slope(double X) {
-
-        } // return the integral value of the function between x value interval,
-        start to end
-// Use 10 million vertical, trapezoidal slices to determine integral
-        value.
-// If start is greater than end, return the negative value of the
-        integration end to start.
-
-public double integral(double start, double end) {
-
-        } // Use any additional methods as you see fit.
-*/
-
-} //End Class
+}   // End of Function Class
